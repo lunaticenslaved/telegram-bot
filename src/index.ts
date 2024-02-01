@@ -2,15 +2,19 @@ import * as dotenv from 'dotenv';
 import { Context, Markup, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 
-import { addWeight } from './weight';
+import { addWeight, createUser, getUserOrThrow } from './user';
 
 dotenv.config();
 
-console.log(process.env.BOT_URL, process.env.SECRET_TOKEN);
-
 const bot: Telegraf<Context<Update>> = new Telegraf(process.env.BOT_TOKEN);
 
-bot.start(ctx => {
+bot.start(async ctx => {
+  try {
+    await getUserOrThrow(ctx.from);
+  } catch (e) {
+    await createUser(ctx.from);
+  }
+
   ctx.reply('Hello ' + ctx.from.first_name + '!');
 });
 
