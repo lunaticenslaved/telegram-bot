@@ -11,18 +11,20 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid()) @db.Uuid
-  telegramId Int
-  weights    Weight[]
+  id           String        @id @default(uuid()) @db.Uuid
+  telegramId   Int
+  consumptions Consumption[]
 
   @@unique([telegramId])
 }
 
-model Weight {
-  date   DateTime @db.Date
-  value  Float
-  userId String   @db.Uuid
-  user   User     @relation(fields: [userId], references: [id])
+model Consumption {
+  date     DateTime @db.Date
+  userId   String   @db.Uuid
+  user     User     @relation(fields: [userId], references: [id])
+  calories Int?
+  weight   Float?
+  comment  String?  @db.VarChar(255)
 
   @@unique([userId, date])
 }
