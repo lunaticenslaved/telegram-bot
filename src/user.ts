@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { User } from 'telegraf/typings/core/types/typegram';
+import { z } from 'zod';
 
 import { prisma } from './prisma';
 
@@ -29,6 +30,29 @@ export async function createUser(user: User) {
   });
 }
 
+const schema = z.object({
+  weight: z.coerce.number().min(1),
+  date: z.string(),
+});
+
+function parseDate(str: string) {
+  if (str === 'today') {
+    return dayjs();
+  }
+
+  if (str === 'yesterday') {
+    return dayjs().subtract(1, 'day');
+  }
+
+  const date = dayjs(str);
+
+  if (!date.isValid()) {
+    throw new Error('Invalid date');
+  }
+
+  return date;
+}
+
 export async function addWeight(args: string[], from: User): Promise<string> {
   const user = await getUserOrThrow(from);
 
@@ -36,16 +60,12 @@ export async function addWeight(args: string[], from: User): Promise<string> {
     throw new Error('Pass args like <weight> <date?>');
   }
 
-  const weightArg = args[0];
-  const dateStr = args[1];
+  const { weight, date: dateStr } = schema.parse({
+    weight: args[0],
+    date: args[1] || 'today',
+  });
 
-  const weight = parseFloat(weightArg);
-
-  if (isNaN(weight)) {
-    throw new Error('Weight is not in right format. Use 50.5 format');
-  }
-
-  const date = dayjs(dateStr).startOf('day');
+  const date = parseDate(dateStr).startOf('day');
 
   await prisma.weight.upsert({
     where: {
