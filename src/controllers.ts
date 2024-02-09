@@ -7,18 +7,12 @@ import { getUserOrThrow } from './services/user';
 export function addCommands(bot: Telegraf<Context<Update>>) {
   for (const { command, schema, argsTransformer, handler } of commands) {
     bot.command(command, async ctx => {
-      const args = ctx.update.message.text.split(' ').slice(1);
-      const data = schema.parse(argsTransformer(args));
-
       try {
+        const args = ctx.update.message.text.split(' ').slice(1);
+        const data = schema.parse(argsTransformer(args));
         const user = await getUserOrThrow(ctx.from);
 
-        const response = await handler({
-          data,
-          user,
-        });
-
-        ctx.reply(response);
+        await handler(ctx, { data, user });
       } catch (error) {
         ctx.reply((error as Error).message);
       }

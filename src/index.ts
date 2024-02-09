@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Markup, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 
 import { addCommands } from './controllers';
@@ -17,6 +17,16 @@ bot.start(async ctx => {
   }
 
   ctx.reply('Hello ' + ctx.from.first_name + '!');
+});
+
+bot.command('keyboard', ctx => {
+  ctx.reply(
+    'Keyboard',
+    Markup.inlineKeyboard([
+      Markup.button.callback('First option', 'first'),
+      Markup.button.callback('Second option', 'second'),
+    ]),
+  );
 });
 
 addCommands(bot);

@@ -11,20 +11,46 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid()) @db.Uuid
-  telegramId   Int
-  consumptions Consumption[]
+  id              String            @id @default(uuid()) @db.Uuid
+  telegramId      Int
+  days            Day[]
+  WeightStatistic WeightStatistic[]
 
   @@unique([telegramId])
 }
 
-model Consumption {
-  date     DateTime @db.Date
-  userId   String   @db.Uuid
-  user     User     @relation(fields: [userId], references: [id])
-  calories Int?
-  weight   Float?
-  comment  String?  @db.VarChar(255)
+model Day {
+  id                String           @id @default(uuid()) @db.Uuid
+  date              DateTime         @db.Date
+  userId            String           @db.Uuid
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calories          Int?
+  weight            Float?
+  comment           String?          @db.VarChar(255)
+  activities        Activity[]
+  weightStatisticId String?          @db.Uuid
+  weightStatistic   WeightStatistic? @relation(fields: [weightStatisticId], references: [id], onDelete: NoAction)
 
   @@unique([userId, date])
+}
+
+model Activity {
+  id      String @id @default(uuid()) @db.Uuid
+  day     Day    @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId   String @db.Uuid
+  type    String @db.VarChar(255)
+  minutes Int
+}
+
+model WeightStatistic {
+  id       String   @id @default(uuid()) @db.Uuid
+  startAt  DateTime
+  endAt    DateTime
+  days     Day[]
+  userId   String   @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight   Float?
+  calories Int?
+
+  @@unique([userId, startAt, endAt])
 }

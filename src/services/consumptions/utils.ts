@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../../libs/dayjs';
 
 export function parseDate(str: string) {
   if (str === 'today') {
@@ -9,7 +9,9 @@ export function parseDate(str: string) {
     return dayjs().subtract(1, 'day').startOf('day');
   }
 
-  const date = dayjs(str).startOf('day');
+  const [day, month, year = dayjs().year()] = str.split('.');
+
+  const date = dayjs(`${day}.${month}.${year}`, 'DD.MM.YYYY').startOf('day');
 
   if (!date.isValid()) {
     throw new Error('Invalid date');
